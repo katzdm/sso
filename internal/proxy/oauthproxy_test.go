@@ -20,6 +20,7 @@ import (
 
 	"github.com/18F/hmacauth"
 	"github.com/buzzfeed/sso/internal/pkg/aead"
+	"github.com/buzzfeed/sso/internal/pkg/aead/mocks"
 	"github.com/buzzfeed/sso/internal/pkg/testutil"
 	"github.com/buzzfeed/sso/internal/proxy/providers"
 )
@@ -1152,7 +1153,7 @@ func TestAuthenticate(t *testing.T) {
 			},
 			ExpectedErr:       ErrInvalidSession,
 			CookieExpectation: ClearCookie,
-			Cipher: &aead.MockCipher{
+			Cipher: &mock.MockCipher{
 				MarshalString:  "randomstring",
 				UnmarshalError: errors.New("siv: authentication failed"),
 			},

@@ -2,6 +2,8 @@ package sessions
 
 import (
 	"net/http"
+
+	"github.com/buzzfeed/sso/internal/pkg/sessions"
 )
 
 // MockCSRFStore is a mock implementation of the CSRF store interface
@@ -29,7 +31,7 @@ func (ms *MockCSRFStore) GetCSRF(*http.Request) (*http.Cookie, error) {
 // MockSessionStore is a mock implementation of the SessionStore interface
 type MockSessionStore struct {
 	ResponseSession string
-	Session         *SessionState
+	Session         *sessions.SessionState
 	SaveError       error
 	LoadError       error
 }
@@ -40,11 +42,11 @@ func (ms *MockSessionStore) ClearSession(http.ResponseWriter, *http.Request) {
 }
 
 // LoadSession returns the session and a error
-func (ms *MockSessionStore) LoadSession(*http.Request) (*SessionState, error) {
+func (ms *MockSessionStore) LoadSession(*http.Request) (*sessions.SessionState, error) {
 	return ms.Session, ms.LoadError
 }
 
 // SaveSession returns a save error.
-func (ms *MockSessionStore) SaveSession(http.ResponseWriter, *http.Request, *SessionState) error {
+func (ms *MockSessionStore) SaveSession(http.ResponseWriter, *http.Request, *sessions.SessionState) error {
 	return ms.SaveError
 }

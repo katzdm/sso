@@ -13,7 +13,9 @@ import (
 	"testing"
 	"time"
 
+	. "github.com/buzzfeed/sso/internal/auth/providers/mocks"
 	"github.com/buzzfeed/sso/internal/pkg/groups"
+	. "github.com/buzzfeed/sso/internal/pkg/groups/mocks"
 	"github.com/buzzfeed/sso/internal/pkg/sessions"
 	"github.com/buzzfeed/sso/internal/pkg/testutil"
 )
@@ -398,7 +400,7 @@ func TestValidateGroupMembers(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			p := GoogleProvider{
 				AdminService: &MockAdminService{Groups: tc.groups, GroupsError: tc.groupsError},
-				GroupsCache:  &groups.MockCache{GetMembersFunc: tc.getMembersFunc, Refreshed: true},
+				GroupsCache:  &MockCache{GetMembersFunc: tc.getMembersFunc, Refreshed: true},
 			}
 
 			groups, err := p.ValidateGroupMembership("email", tc.inputAllowedGroups)

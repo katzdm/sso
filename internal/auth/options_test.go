@@ -23,7 +23,7 @@ func testOptions() *Options {
 	o.StatsdPort = 12344
 	o.Host = "/"
 	o.CookieRefresh = time.Hour
-	o.CookieSecret = testEncodedCookieSecret
+	o.CookieSecret = "x7xzsM1Ky4vGQPwqy6uTztfr3jtm/pIdRbJXgE0q8kU="
 	return o
 }
 
@@ -75,7 +75,6 @@ func TestCookieRefreshMustBeLessThanCookieExpire(t *testing.T) {
 	o := testOptions()
 	testutil.Equal(t, nil, o.Validate())
 
-	o.CookieSecret = testEncodedCookieSecret
 	o.CookieRefresh = o.CookieExpire
 	testutil.NotEqual(t, nil, o.Validate())
 
@@ -88,11 +87,9 @@ func TestBase64CookieSecret(t *testing.T) {
 	testutil.Equal(t, nil, o.Validate())
 
 	// 32 byte, base64 (urlsafe) encoded key
-	o.CookieSecret = testEncodedCookieSecret
 	testutil.Equal(t, nil, o.Validate())
 
 	// 32 byte, base64 (urlsafe) encoded key, w/o padding
-	o.CookieSecret = testEncodedCookieSecret
 	testutil.Equal(t, nil, o.Validate())
 }
 

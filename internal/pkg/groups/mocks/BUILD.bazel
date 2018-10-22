@@ -1,0 +1,11 @@
+package(default_visibility = ["//visibility:public"])
+
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+	name = "mocks",
+	srcs = ["mock_cache.go"],
+	deps = ["//internal/pkg/groups"],
+	importpath = "github.com/buzzfeed/sso/internal/pkg/groups/mocks",
+	testonly = 1,
+)

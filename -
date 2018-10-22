@@ -1,0 +1,3 @@
+Build options: --verbose_explanations --explain=-
+Executing action 'BazelWorkspaceStatusAction stable-status.txt': unconditional execution is requested.
+Executing action 'GoCompile internal/proxy/darwin_amd64_stripped/oauthproxy_test%/github.com/buzzfeed/sso/proxy.a': no entry in the cache (action is new).

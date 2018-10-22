@@ -1,0 +1,19 @@
+package(default_visibility = ["//visibility:public"])
+
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+	name = "groups",
+	srcs = ["fillcache.go"],
+	deps = [
+		"//internal/pkg/logging",
+		"@com_datadog_go//statsd:go_default_library"
+	],
+	importpath = "github.com/buzzfeed/sso/internal/pkg/groups",
+)
+
+go_test(
+	name = "fillcache_test",
+	srcs = ["fillcache_test.go"],
+	embed = [":groups"],
+)

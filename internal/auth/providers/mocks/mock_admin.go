@@ -1,4 +1,4 @@
-package providers
+package mocks
 
 // MockAdminService is an implementation of AdminService to be used for testing
 type MockAdminService struct {

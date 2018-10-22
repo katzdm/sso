@@ -1,0 +1,15 @@
+package(default_visibility = ["//visibility:public"])
+
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
+
+go_library(
+	name = "options",
+	srcs = ["email_validator.go"],
+	importpath = "github.com/buzzfeed/sso/internal/pkg/options",
+)
+
+go_test(
+	name = "email_validator_test",
+	srcs = ["email_validator_test.go"],
+	embed = [":options"],
+)

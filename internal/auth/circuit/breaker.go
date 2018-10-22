@@ -199,9 +199,10 @@ func NewBreaker(opts *Options) *Breaker {
 		b.shouldResetFunc = opts.ShouldResetFunc
 	}
 
-	b.clock = clock.New()
 	if opts.TestClock != nil {
 		b.clock = opts.TestClock
+	} else {
+		b.clock = clock.New()
 	}
 
 	b.setState(StateClosed)

@@ -1,0 +1,50 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
+
+go_library(
+	name = "providers",
+	srcs = [
+		"http_client.go",
+		"internal_util.go",
+		"provider_data.go",
+		"provider_default.go",
+		"providers.go",
+		"session_state.go",
+		"singleflight_middleware.go",
+		"sso.go",
+	],
+	deps = [
+		"//internal/pkg/aead",
+		"//internal/pkg/logging",
+		"//internal/pkg/singleflight",
+		"@com_datadog_go//statsd:go_default_library",
+	],
+	importpath = "github.com/buzzfeed/sso/internal/proxy/providers",
+	visibility = ["//visibility:public"],
+)
+
+go_test(
+	name = "internal_util_test",
+	srcs = ["internal_util_test.go"],
+	embed = [":providers"],
+	deps = ["//internal/pkg/testutil"],
+)
+
+go_test(
+	name = "provider_default_test",
+	srcs = ["provider_default_test.go"],
+	embed = [":providers"],
+	deps = ["//internal/pkg/testutil"],
+)
+
+go_test(
+	name = "session_state_test",
+	srcs = ["session_state_test.go"],
+	embed = [":providers"],
+)
+
+go_test(
+	name = "sso_test",
+	srcs = ["sso_test.go"],
+	embed = [":providers"],
+	deps = ["//internal/pkg/testutil"],
+)

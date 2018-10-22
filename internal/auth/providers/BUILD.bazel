@@ -1,0 +1,45 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
+
+go_library(
+	name = "providers",
+	srcs = [
+		"google.go",
+		"google_admin.go",
+		"http_client.go",
+		"internal_util.go",
+		"provider_data.go",
+		"provider_default.go",
+		"providers.go",
+		"singleflight_middleware.go",
+		"test_provider.go",
+	],
+	deps = [
+		"//internal/auth/circuit",
+		"//internal/pkg/groups",
+		"//internal/pkg/logging",
+		"//internal/pkg/sessions",
+		"//internal/pkg/singleflight",
+		"@com_datadog_go//statsd:go_default_library",
+		"@com_google_api_go//admin/directory/v1:go_default_library",
+		"@com_google_api_go//googleapi:go_default_library",
+		"@com_google_cloud_go//compute/metadata:go_default_library",
+		"@org_golang_x_oauth2//:go_default_library",
+		"@org_golang_x_oauth2//google:go_default_library",
+	],
+	importpath = "github.com/buzzfeed/sso/internal/auth/providers",
+	visibility = ["//visibility:public"],
+)
+
+go_test(
+	name = "google_test",
+	srcs = [
+		"google_test.go",
+		"internal_util_test.go",
+	],
+	embed = [":providers"],
+	deps = [
+		"//internal/auth/providers/mocks",
+		"//internal/pkg/groups/mocks",
+		"//internal/pkg/testutil"
+	],
+)

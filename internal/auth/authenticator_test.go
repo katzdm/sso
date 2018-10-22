@@ -16,9 +16,10 @@ import (
 	"time"
 
 	"github.com/buzzfeed/sso/internal/auth/providers"
-	"github.com/buzzfeed/sso/internal/pkg/aead"
+	. "github.com/buzzfeed/sso/internal/pkg/aead/mocks"
 	"github.com/buzzfeed/sso/internal/pkg/sessions"
-	"github.com/buzzfeed/sso/internal/pkg/templates"
+	. "github.com/buzzfeed/sso/internal/pkg/sessions/mocks"
+	. "github.com/buzzfeed/sso/internal/pkg/templates/mocks"
 	"github.com/buzzfeed/sso/internal/pkg/testutil"
 )
 
@@ -27,14 +28,14 @@ func init() {
 
 }
 
-func setMockCSRFStore(store *sessions.MockCSRFStore) func(*Authenticator) error {
+func setMockCSRFStore(store *MockCSRFStore) func(*Authenticator) error {
 	return func(a *Authenticator) error {
 		a.csrfStore = store
 		return nil
 	}
 }
 
-func setMockSessionStore(store *sessions.MockSessionStore) func(*Authenticator) error {
+func setMockSessionStore(store *MockSessionStore) func(*Authenticator) error {
 	return func(a *Authenticator) error {
 		a.sessionStore = store
 		return nil
@@ -43,12 +44,12 @@ func setMockSessionStore(store *sessions.MockSessionStore) func(*Authenticator) 
 
 func setMockTempl() func(*Authenticator) error {
 	return func(a *Authenticator) error {
-		a.templates = &templates.MockTemplate{}
+		a.templates = &MockTemplate{}
 		return nil
 	}
 }
 
-func setMockAuthCodeCipher(cipher *aead.MockCipher, s interface{}) func(*Authenticator) error {
+func setMockAuthCodeCipher(cipher *MockCipher, s interface{}) func(*Authenticator) error {
 	marshaled, _ := json.Marshal(s)
 	if len(marshaled) > 0 && cipher != nil {
 		cipher.UnmarshalBytes = marshaled
@@ -132,9 +133,9 @@ func TestSignIn(t *testing.T) {
 	testCases := []struct {
 		name                   string
 		paramsMap              map[string]string
-		mockCSRFStore          *sessions.MockCSRFStore
-		mockSessionStore       *sessions.MockSessionStore
-		mockAuthCodeCipher     *aead.MockCipher
+		mockCSRFStore          *MockCSRFStore
+		mockSessionStore       *MockSessionStore
+		mockAuthCodeCipher     *MockCipher
 		refreshResponse        providerRefreshResponse
 		providerValidToken     bool
 		validEmail             bool
@@ -145,7 +146,7 @@ func TestSignIn(t *testing.T) {
 	}{
 		{
 			name: "err no cookie calls proxy oauth redirect, no params map redirects to sign in page",
-			mockSessionStore: &sessions.MockSessionStore{
+			mockSessionStore: &MockSessionStore{
 				LoadError: http.ErrNoCookie,
 			},
 			expectedSignInPage:     true,
@@ -154,7 +155,7 @@ func TestSignIn(t *testing.T) {
 		},
 		{
 			name: "err no cookie calls proxy oauth redirect, with redirect url redirects to sign in page",
-			mockSessionStore: &sessions.MockSessionStore{
+			mockSessionStore: &MockSessionStore{
 				LoadError: http.ErrNoCookie,
 			},
 			paramsMap: map[string]string{
@@ -166,7 +167,7 @@ func TestSignIn(t *testing.T) {
 		},
 		{
 			name: "another error that isn't no cookie",
-			mockSessionStore: &sessions.MockSessionStore{
+			mockSessionStore: &MockSessionStore{
 				LoadError: fmt.Errorf("another error"),
 			},
 			expectedCode:          http.StatusInternalServerError,
@@ -174,7 +175,7 @@ func TestSignIn(t *testing.T) {
 		},
 		{
 			name: "expired lifetime of session clears session and redirects to sign in",
-			mockSessionStore: &sessions.MockSessionStore{
+			mockSessionStore: &MockSessionStore{
 				Session: &sessions.SessionState{
 					Email:            "email",
 					AccessToken:      "accesstoken",
@@ -189,7 +190,7 @@ func TestSignIn(t *testing.T) {
 		},
 		{
 			name: "refresh period expired, provider error",
-			mockSessionStore: &sessions.MockSessionStore{
+			mockSessionStore: &MockSessionStore{
 				Session: &sessions.SessionState{
 					Email:            "email",
 					AccessToken:      "accesstoken",
@@ -206,7 +207,7 @@ func TestSignIn(t *testing.T) {
 		},
 		{
 			name: "refresh period expired, not refreshed - unauthorized user",
-			mockSessionStore: &sessions.MockSessionStore{
+			mockSessionStore: &MockSessionStore{
 				Session: &sessions.SessionState{
 					Email:            "email",
 					AccessToken:      "accesstoken",
@@ -221,7 +222,7 @@ func TestSignIn(t *testing.T) {
 		},
 		{
 			name: "refresh period expired, refresh ok, save session error",
-			mockSessionStore: &sessions.MockSessionStore{
+			mockSessionStore: &MockSessionStore{
 				Session: &sessions.SessionState{
 					Email:            "email",
 					AccessToken:      "accesstoken",
@@ -239,7 +240,7 @@ func TestSignIn(t *testing.T) {
 		},
 		{
 			name: "refresh period expired, successful refresh, invalid email",
-			mockSessionStore: &sessions.MockSessionStore{
+			mockSessionStore: &MockSessionStore{
 				Session: &sessions.SessionState{
 					Email:            "email",
 					AccessToken:      "accesstoken",
@@ -256,7 +257,7 @@ func TestSignIn(t *testing.T) {
 		},
 		{
 			name: "valid session state, save session error",
-			mockSessionStore: &sessions.MockSessionStore{
+			mockSessionStore: &MockSessionStore{
 				Session: &sessions.SessionState{
 					Email:            "email",
 					AccessToken:      "accesstoken",
@@ -272,7 +273,7 @@ func TestSignIn(t *testing.T) {
 		},
 		{
 			name: "invalid session state, invalid email",
-			mockSessionStore: &sessions.MockSessionStore{
+			mockSessionStore: &MockSessionStore{
 				Session: &sessions.SessionState{
 					Email:            "email",
 					AccessToken:      "accesstoken",
@@ -286,7 +287,7 @@ func TestSignIn(t *testing.T) {
 		},
 		{
 			name: "refresh period expired, successful refresh, no state in params",
-			mockSessionStore: &sessions.MockSessionStore{
+			mockSessionStore: &MockSessionStore{
 				Session: &sessions.SessionState{
 					Email:            "email",
 					AccessToken:      "accesstoken",
@@ -307,7 +308,7 @@ func TestSignIn(t *testing.T) {
 			paramsMap: map[string]string{
 				"state": "state",
 			},
-			mockSessionStore: &sessions.MockSessionStore{
+			mockSessionStore: &MockSessionStore{
 				Session: &sessions.SessionState{
 					Email:            "email",
 					AccessToken:      "accesstoken",
@@ -329,7 +330,7 @@ func TestSignIn(t *testing.T) {
 				"state":        "state",
 				"redirect_uri": ":",
 			},
-			mockSessionStore: &sessions.MockSessionStore{
+			mockSessionStore: &MockSessionStore{
 				Session: &sessions.SessionState{
 					Email:            "email",
 					AccessToken:      "accesstoken",
@@ -347,7 +348,7 @@ func TestSignIn(t *testing.T) {
 		},
 		{
 			name: "refresh period expired, unsuccessful marshal",
-			mockSessionStore: &sessions.MockSessionStore{
+			mockSessionStore: &MockSessionStore{
 				Session: &sessions.SessionState{
 					Email:            "email",
 					AccessToken:      "accesstoken",
@@ -363,7 +364,7 @@ func TestSignIn(t *testing.T) {
 			refreshResponse: providerRefreshResponse{
 				OK: true,
 			},
-			mockAuthCodeCipher: &aead.MockCipher{
+			mockAuthCodeCipher: &MockCipher{
 				MarshalError: fmt.Errorf("error marshal"),
 			},
 			validEmail:            true,
@@ -372,7 +373,7 @@ func TestSignIn(t *testing.T) {
 		},
 		{
 			name: "refresh period expired, successful refresh",
-			mockSessionStore: &sessions.MockSessionStore{
+			mockSessionStore: &MockSessionStore{
 				Session: &sessions.SessionState{
 					Email:            "email",
 					AccessToken:      "accesstoken",
@@ -388,7 +389,7 @@ func TestSignIn(t *testing.T) {
 			refreshResponse: providerRefreshResponse{
 				OK: true,
 			},
-			mockAuthCodeCipher: &aead.MockCipher{
+			mockAuthCodeCipher: &MockCipher{
 				MarshalString: "abcdefg",
 			},
 			validEmail:   true,
@@ -396,7 +397,7 @@ func TestSignIn(t *testing.T) {
 		},
 		{
 			name: "valid session state, successful save",
-			mockSessionStore: &sessions.MockSessionStore{
+			mockSessionStore: &MockSessionStore{
 				Session: &sessions.SessionState{
 					Email:            "email",
 					AccessToken:      "accesstoken",
@@ -411,7 +412,7 @@ func TestSignIn(t *testing.T) {
 			},
 			validEmail:         true,
 			providerValidToken: true,
-			mockAuthCodeCipher: &aead.MockCipher{
+			mockAuthCodeCipher: &MockCipher{
 				MarshalString: "abcdefg",
 			},
 
@@ -485,7 +486,7 @@ func TestSignOutPage(t *testing.T) {
 		paramsMap           map[string]string
 		RedirectURI         string
 		Method              string
-		mockSessionStore    *sessions.MockSessionStore
+		mockSessionStore    *MockSessionStore
 		RevokeError         error
 		expectedSignOutResp *signOutResp
 	}{
@@ -494,7 +495,7 @@ func TestSignOutPage(t *testing.T) {
 			paramsMap: map[string]string{
 				"redirect_uri": "http://service.example.com",
 			},
-			mockSessionStore: &sessions.MockSessionStore{
+			mockSessionStore: &MockSessionStore{
 				Session: &sessions.SessionState{
 					Email:           "test@example.com",
 					RefreshDeadline: time.Now().Add(time.Hour),
@@ -514,7 +515,7 @@ func TestSignOutPage(t *testing.T) {
 		{
 			Name:               "redirect if no session exists on GET",
 			ExpectedStatusCode: http.StatusFound,
-			mockSessionStore: &sessions.MockSessionStore{
+			mockSessionStore: &MockSessionStore{
 				LoadError: http.ErrNoCookie,
 			},
 			paramsMap: map[string]string{
@@ -525,7 +526,7 @@ func TestSignOutPage(t *testing.T) {
 		{
 			Name:               "redirect if no session exists on POST",
 			ExpectedStatusCode: http.StatusFound,
-			mockSessionStore: &sessions.MockSessionStore{
+			mockSessionStore: &MockSessionStore{
 				LoadError: http.ErrNoCookie,
 			},
 			paramsMap: map[string]string{
@@ -536,14 +537,14 @@ func TestSignOutPage(t *testing.T) {
 		{
 			Name:               "sign out page also used to POST",
 			ExpectedStatusCode: http.StatusFound,
-			mockSessionStore:   &sessions.MockSessionStore{},
+			mockSessionStore:   &MockSessionStore{},
 			RedirectURI:        "http://service.example.com",
 			Method:             "POST",
 		},
 		{
 			Name:               "sign out page shows error message if revoke fails",
 			ExpectedStatusCode: http.StatusInternalServerError,
-			mockSessionStore: &sessions.MockSessionStore{
+			mockSessionStore: &MockSessionStore{
 				Session: &sessions.SessionState{
 					Email:           "test@example.com",
 					RefreshDeadline: time.Now().Add(time.Hour),
@@ -728,7 +729,7 @@ func TestProxyOAuthRedirect(t *testing.T) {
 	testCases := []struct {
 		name               string
 		paramsMap          map[string]string
-		mockCipher         *aead.MockCipher
+		mockCipher         *MockCipher
 		expectedStatusCode int
 	}{
 		{
@@ -737,7 +738,7 @@ func TestProxyOAuthRedirect(t *testing.T) {
 				"state":        "state",
 				"redirect_uri": "http://example.com",
 			},
-			mockCipher: &aead.MockCipher{
+			mockCipher: &MockCipher{
 				MarshalString: "abced",
 			},
 			expectedStatusCode: http.StatusFound,
@@ -767,7 +768,7 @@ func TestProxyOAuthRedirect(t *testing.T) {
 				"state":        "state",
 				"redirect_uri": "http://example.com",
 			},
-			mockCipher:         &aead.MockCipher{MarshalError: fmt.Errorf("error")},
+			mockCipher:         &MockCipher{MarshalError: fmt.Errorf("error")},
 			expectedStatusCode: http.StatusInternalServerError,
 		},
 	}
@@ -1078,7 +1079,7 @@ func TestRedeemEndpoint(t *testing.T) {
 		name                        string
 		paramsMap                   map[string]string
 		sessionState                *sessions.SessionState
-		mockCipher                  *aead.MockCipher
+		mockCipher                  *MockCipher
 		expectedGAPAuthHeader       string
 		expectedStatusCode          int
 		expectedResponseEmail       string
@@ -1086,12 +1087,12 @@ func TestRedeemEndpoint(t *testing.T) {
 	}{
 		{
 			name:               "cipher error",
-			mockCipher:         &aead.MockCipher{UnmarshalError: fmt.Errorf("mock cipher error")},
+			mockCipher:         &MockCipher{UnmarshalError: fmt.Errorf("mock cipher error")},
 			expectedStatusCode: http.StatusUnauthorized,
 		},
 		{
 			name:       "refresh deadline expired for session state",
-			mockCipher: &aead.MockCipher{},
+			mockCipher: &MockCipher{},
 			paramsMap: map[string]string{
 				"code": "code",
 			},
@@ -1106,7 +1107,7 @@ func TestRedeemEndpoint(t *testing.T) {
 		},
 		{
 			name:       "lifetime deadline expired for session state",
-			mockCipher: &aead.MockCipher{},
+			mockCipher: &MockCipher{},
 			paramsMap: map[string]string{
 				"code": "code",
 			},
@@ -1121,13 +1122,13 @@ func TestRedeemEndpoint(t *testing.T) {
 		},
 		{
 			name:               "empty session returned",
-			mockCipher:         &aead.MockCipher{},
+			mockCipher:         &MockCipher{},
 			expectedStatusCode: http.StatusUnauthorized,
 		},
 
 		{
 			name:       "all valid",
-			mockCipher: &aead.MockCipher{},
+			mockCipher: &MockCipher{},
 			sessionState: &sessions.SessionState{
 				RefreshDeadline:  time.Now().Add(time.Hour),
 				Email:            "example@test.com",
@@ -1146,7 +1147,7 @@ func TestRedeemEndpoint(t *testing.T) {
 			opts := testOpts("client_id", "client_secret")
 			opts.Validate()
 			p, _ := NewAuthenticator(opts, setMockAuthCodeCipher(tc.mockCipher, tc.sessionState),
-				setMockSessionStore(&sessions.MockSessionStore{}))
+				setMockSessionStore(&MockSessionStore{}))
 
 			params := url.Values{}
 			for k, v := range tc.paramsMap {
@@ -1201,8 +1202,8 @@ func TestOAuthCallback(t *testing.T) {
 		expectedError      error
 		testRedeemResponse testRedeemResponse
 		validEmail         bool
-		csrfResp           *sessions.MockCSRFStore
-		sessionStore       *sessions.MockSessionStore
+		csrfResp           *MockCSRFStore
+		sessionStore       *MockSessionStore
 		expectedRedirect   string
 	}{
 		{
@@ -1288,7 +1289,7 @@ func TestOAuthCallback(t *testing.T) {
 					RefreshToken:    "refresh",
 				},
 			},
-			csrfResp: &sessions.MockCSRFStore{
+			csrfResp: &MockCSRFStore{
 				GetError: http.ErrNoCookie,
 			},
 			expectedError: HTTPError{Code: http.StatusForbidden, Message: "Missing CSRF token"},
@@ -1308,7 +1309,7 @@ func TestOAuthCallback(t *testing.T) {
 				},
 			},
 
-			csrfResp: &sessions.MockCSRFStore{
+			csrfResp: &MockCSRFStore{
 				Cookie: &http.Cookie{
 					Name:  "something_csrf",
 					Value: "notstate",
@@ -1331,7 +1332,7 @@ func TestOAuthCallback(t *testing.T) {
 					RefreshToken:    "refresh",
 				},
 			},
-			csrfResp: &sessions.MockCSRFStore{
+			csrfResp: &MockCSRFStore{
 				Cookie: &http.Cookie{
 					Name:  "something_csrf",
 					Value: "state",
@@ -1353,7 +1354,7 @@ func TestOAuthCallback(t *testing.T) {
 					RefreshToken:    "refresh",
 				},
 			},
-			csrfResp: &sessions.MockCSRFStore{
+			csrfResp: &MockCSRFStore{
 				Cookie: &http.Cookie{
 					Name:  "something_csrf",
 					Value: "state",
@@ -1376,13 +1377,13 @@ func TestOAuthCallback(t *testing.T) {
 					RefreshToken:    "refresh",
 				},
 			},
-			csrfResp: &sessions.MockCSRFStore{
+			csrfResp: &MockCSRFStore{
 				Cookie: &http.Cookie{
 					Name:  "something_csrf",
 					Value: "state",
 				},
 			},
-			sessionStore: &sessions.MockSessionStore{
+			sessionStore: &MockSessionStore{
 				SaveError: fmt.Errorf("saveError"),
 			},
 			validEmail:    true,
@@ -1402,13 +1403,13 @@ func TestOAuthCallback(t *testing.T) {
 					RefreshToken:    "refresh",
 				},
 			},
-			csrfResp: &sessions.MockCSRFStore{
+			csrfResp: &MockCSRFStore{
 				Cookie: &http.Cookie{
 					Name:  "something_csrf",
 					Value: "state",
 				},
 			},
-			sessionStore:     &sessions.MockSessionStore{},
+			sessionStore:     &MockSessionStore{},
 			validEmail:       true,
 			expectedRedirect: "http://www.example.com/something",
 		},
@@ -1449,7 +1450,7 @@ func TestOAuthCallback(t *testing.T) {
 			if err == nil {
 				testutil.Equal(t, tc.expectedRedirect, redirect)
 				switch store := proxy.csrfStore.(type) {
-				case *sessions.MockCSRFStore:
+				case *MockCSRFStore:
 					testutil.Equal(t, store.ResponseCSRF, "")
 				default:
 					t.Errorf("invalid csrf store with type %t", store)
@@ -1463,7 +1464,7 @@ func TestOAuthCallback(t *testing.T) {
 func TestGlobalHeaders(t *testing.T) {
 	opts := testOpts("abced", "testtest")
 	opts.Validate()
-	proxy, _ := NewAuthenticator(opts, setMockCSRFStore(&sessions.MockCSRFStore{}))
+	proxy, _ := NewAuthenticator(opts, setMockCSRFStore(&MockCSRFStore{}))
 
 	// see middleware.go
 	expectedHeaders := securityHeaders
@@ -1546,7 +1547,7 @@ func TestOAuthStart(t *testing.T) {
 			proxy, _ := NewAuthenticator(opts, setTestProvider(provider), func(p *Authenticator) error {
 				p.Validator = func(string) bool { return true }
 				return nil
-			}, setMockCSRFStore(&sessions.MockCSRFStore{}))
+			}, setMockCSRFStore(&MockCSRFStore{}))
 
 			params := url.Values{}
 			if tc.RedirectURI != "" {

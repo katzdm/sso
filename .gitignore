@@ -5,6 +5,9 @@ env
 # Don't check in the dist/ directory created by make
 dist/
 
+# Ignore bazel-generated directories
+bazel-*/
+
 # Compiled source #
 ###################
 *.com

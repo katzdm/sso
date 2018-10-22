@@ -1,0 +1,31 @@
+package(default_visibility = ["//visibility:public"])
+
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+	name = "sessions",
+	srcs = [
+		"cookie_store.go",
+		"session_state.go",
+	],
+	deps = [
+		"//internal/pkg/aead",
+		"//internal/pkg/logging",
+	],
+	importpath = "github.com/buzzfeed/sso/internal/pkg/sessions",
+)
+
+go_test(
+	name = "cookie_store_test",
+	srcs = ["cookie_store_test.go"],
+	embed = [":sessions"],
+	deps = [
+		"//internal/pkg/testutil",
+	],
+)
+
+go_test(
+	name = "session_state_test",
+	srcs = ["session_state_test.go"],
+	embed = [":sessions"],
+)

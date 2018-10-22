@@ -1,0 +1,16 @@
+package(default_visibility = ["//visibility:public"])
+
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+	name = "aead",
+	srcs = ["aead.go"],
+	deps = ["@com_miscreant_go//:go_default_library"],
+	importpath = "github.com/buzzfeed/sso/internal/pkg/aead",
+)
+
+go_test(
+	name = "aead_test",
+	srcs = ["aead_test.go"],
+	embed = [":aead"],
+)

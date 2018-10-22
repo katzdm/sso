@@ -1,0 +1,9 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
+
+go_library(
+	name = "statik",
+	srcs = ["statik.go"],
+	deps = ["@com_rakyll_statik//fs:go_default_library"],
+	importpath = "github.com/buzzfeed/sso/internal/auth/statik",
+	visibility = ["//internal/auth:__subpackages__"],
+)

@@ -1,0 +1,68 @@
+package(default_visibility = ["//visibility:public"])
+
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
+
+go_library(
+	name = "auth",
+	srcs = [
+		"authenticator.go",
+		"error.go",
+		"http.go",
+		"logging_handler.go",
+		"metrics.go",
+		"middleware.go",
+		"options.go",
+		"static_files.go",
+		"version.go",
+	],
+	deps = [
+		"//internal/pkg/aead",
+		"//internal/pkg/groups",
+		"//internal/pkg/logging",
+		"//internal/pkg/sessions",
+		"//internal/pkg/templates",
+		"//internal/auth/providers",
+		"//internal/auth/statik",
+		"@com_datadog_go//statsd:go_default_library",
+		"@com_rakyll_statik//fs:go_default_library",
+	],
+	importpath = "github.com/buzzfeed/sso/internal/auth",
+)
+
+go_test(
+	name = "authenticator_test",
+	srcs = [
+		"authenticator_test.go",
+		# TODO: Decouple `testOps` from `authenticator_test` and separate these tests out.
+		"metrics_test.go",
+		"middleware_test.go",
+		"static_files_test.go",
+	],
+	deps = [
+		"//internal/pkg/aead/mocks",
+		"//internal/pkg/sessions/mocks",
+		"//internal/pkg/templates/mocks",
+		"//internal/pkg/testutil",
+	],
+	embed = [":auth"],
+	data = ["static/sso.css"],
+)
+
+go_test(
+	name = "logging_handler_test",
+	srcs = ["logging_handler_test.go"],
+	embed = [":auth"],
+)
+
+go_test(
+	name = "metrics_test",
+	srcs = ["metrics_test.go"],
+	embed = [":auth"],
+)
+
+go_test(
+	name = "options_test",
+	srcs = ["options_test.go"],
+	embed = [":auth"],
+	deps = ["//internal/pkg/testutil"],
+)

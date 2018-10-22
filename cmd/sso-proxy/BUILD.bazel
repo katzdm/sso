@@ -1,0 +1,25 @@
+load("@io_bazel_rules_docker//container:container.bzl", "container_push")
+load("@io_bazel_rules_docker//go:image.bzl", "go_image")
+
+go_image(
+	name = "image",
+	srcs = ["main.go"],
+	deps = [
+		"//internal/pkg/logging",
+		"//internal/pkg/options",
+		"//internal/proxy",
+		"@com_kelseyhightower_envconfig//:go_default_library",
+	],
+	goarch = "amd64",
+	goos = "linux",
+	pure = "on",
+)
+
+container_push(
+	name = "push",
+	image = ":image",
+	format = "Docker",
+	registry = "donotupload.io",
+	repository = "sso-dev/sso-proxy",
+	tag = "sso-proxy-$(tag_timestamp)-$(tag_commit)-$(tag_branch)"
+)

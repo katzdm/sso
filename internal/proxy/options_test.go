@@ -11,7 +11,7 @@ import (
 
 func testOptions() *Options {
 	o := NewOptions()
-	o.CookieSecret = testEncodedCookieSecret
+	o.CookieSecret = "tJgzIEug8M/6Asjn5mvpWxxef5d5duU7BwpuD0GCHRI="
 	o.ClientID = "bazquux"
 	o.ClientSecret = "xyzzyplugh"
 	o.EmailDomains = []string{"*"}
@@ -144,11 +144,9 @@ func TestBase64CookieSecret(t *testing.T) {
 	testutil.Equal(t, nil, o.Validate())
 
 	// 32 byte, base64 (urlsafe) encoded key
-	o.CookieSecret = testEncodedCookieSecret
 	testutil.Equal(t, nil, o.Validate())
 
 	// 32 byte, base64 (urlsafe) encoded key, w/o padding
-	o.CookieSecret = testEncodedCookieSecret
 	testutil.Equal(t, nil, o.Validate())
 
 	testutil.Equal(t, nil, o.Validate())

@@ -1,0 +1,9 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
+
+go_library(
+	name = "collector",
+	srcs = ["collector.go"],
+	deps = ["@com_datadog_go//statsd:go_default_library"],
+	importpath = "github.com/buzzfeed/sso/internal/proxy/collector",
+	visibility = ["//internal/proxy:__subpackages__"],
+)

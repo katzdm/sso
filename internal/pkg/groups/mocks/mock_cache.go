@@ -1,8 +1,10 @@
-package groups
+package mocks
+
+import "github.com/buzzfeed/sso/internal/pkg/groups"
 
 // MockCache is a mock of MemberSetCache that can be used for testing purposes
 type MockCache struct {
-	GetMembersFunc func(string) (MemberSet, bool)
+	GetMembersFunc func(string) (groups.MemberSet, bool)
 	Exists         bool
 	Updated        bool
 	UpdateError    error
@@ -10,7 +12,7 @@ type MockCache struct {
 }
 
 // Get returns the members and if the set exists
-func (mc *MockCache) Get(group string) (MemberSet, bool) {
+func (mc *MockCache) Get(group string) (groups.MemberSet, bool) {
 	return mc.GetMembersFunc(group)
 }
 
@@ -24,7 +26,7 @@ func (mc *MockCache) RefreshLoop(string) bool {
 	return mc.Refreshed
 }
 
-// Stop fufills the MemberSetCache interface
+// Stop satisfies the MemberSetCache interface
 func (mc *MockCache) Stop() {
 	return
 }

@@ -1,0 +1,70 @@
+package(default_visibility = ["//visibility:public"])
+
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
+
+go_library(
+	name = "proxy",
+	srcs = [
+		"logging_handler.go",
+		"metrics.go",
+		"middleware.go",
+		"oauthproxy.go",
+		"options.go",
+		"proxy_config.go",
+		"templates.go",
+	],
+	deps = [
+		"//internal/pkg/aead",
+		"//internal/pkg/logging",
+		"//internal/proxy/collector",
+		"//internal/proxy/providers",
+		"@com_18f_hmacauth//:go_default_library",
+		"@com_datadog_go//statsd:go_default_library",
+		"@com_go_yaml//:go_default_library",
+		"@com_imdario_mergo//:go_default_library",
+	],
+	importpath = "github.com/buzzfeed/sso/internal/proxy",
+)
+
+go_test(
+	name = "logging_handler_test",
+	srcs = ["logging_handler_test.go"],
+	embed = [":proxy"],
+)
+
+go_test(
+	name = "metrics_test",
+	srcs = ["metrics_test.go"],
+	embed = [":proxy"],
+)
+
+go_test(
+	name = "oauthproxy_test",
+	srcs = ["oauthproxy_test.go"],
+	embed = [":proxy"],
+	deps = [
+		"//internal/pkg/aead/mocks",
+		"//internal/pkg/testutil"
+	],
+)
+
+go_test(
+	name = "options_test",
+	srcs = ["options_test.go"],
+	embed = [":proxy"],
+	deps = ["//internal/pkg/testutil"],
+	data = ["testdata/upstream_configs.yml"],
+)
+
+go_test(
+	name = "proxy_config_test",
+	srcs = ["proxy_config_test.go"],
+	embed = [":proxy"],
+)
+
+go_test(
+	name = "templates_test",
+	srcs = ["templates_test.go"],
+	embed = [":proxy"],
+	deps = ["//internal/pkg/testutil"],
+)

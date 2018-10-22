@@ -1,0 +1,15 @@
+package(default_visibility = ["//visibility:public"])
+
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+	name = "templates",
+	srcs = ["templates.go"],
+	importpath = "github.com/buzzfeed/sso/internal/pkg/templates",
+)
+
+go_test(
+	name = "templates_test",
+	srcs = ["templates_test.go"],
+	embed = [":templates"],
+)

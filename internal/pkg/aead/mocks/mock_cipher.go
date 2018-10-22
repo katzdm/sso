@@ -1,4 +1,4 @@
-package aead
+package mock
 
 import (
 	"encoding/json"
